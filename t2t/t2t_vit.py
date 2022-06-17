@@ -50,7 +50,7 @@ class T2T_module(nn.Module):
 
         if tokens_type == 'transformer':
             print('adopt transformer encoder for tokens-to-token')
-            self.soft_split0 = nn.Unfold(kernel_size=(7, 7), stride=(4, 4), padding=(2, 2))
+            self.soft_split0 = nn.Unfold(kernel_size=(7, 7), stride=(4, 4), padding=(3, 3))
             self.soft_split1 = nn.Unfold(kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
             self.soft_split2 = nn.Unfold(kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
 
@@ -60,8 +60,8 @@ class T2T_module(nn.Module):
 
         elif tokens_type == 'performer':
             print('adopt performer encoder for tokens-to-token')
-            self.soft_split0 = nn.Unfold(kernel_size=(7, 7), stride=(4, 4), padding=(2, 2))
-            self.soft_split1 = nn.Unfold(kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            self.soft_split0 = nn.Unfold(kernel_size=(7, 7), stride=(4, 4), padding=(3, 3))
+            self.soft_split1 = nn.Unfold(kernel_size=(3, 3), stride=(4, 4), padding=(1, 1))
             self.soft_split2 = nn.Unfold(kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
 
             #self.attention1 = Token_performer(dim=token_dim, in_dim=in_chans*7*7, kernel_ratio=0.5)
@@ -73,7 +73,7 @@ class T2T_module(nn.Module):
         elif tokens_type == 'convolution':  # just for comparison with conolution, not our model
             # for this tokens type, you need change forward as three convolution operation
             print('adopt convolution layers for tokens-to-token')
-            self.soft_split0 = nn.Conv2d(3, token_dim, kernel_size=(7, 7), stride=(4, 4), padding=(2, 2))  # the 1st convolution
+            self.soft_split0 = nn.Conv2d(3, token_dim, kernel_size=(7, 7), stride=(4, 4), padding=(3, 3))  # the 1st convolution
             self.soft_split1 = nn.Conv2d(token_dim, token_dim, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1)) # the 2nd convolution
             self.project = nn.Conv2d(token_dim, embed_dim, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1)) # the 3rd convolution
 
@@ -84,8 +84,8 @@ class T2T_module(nn.Module):
         _, _, W, H = x.shape
         x = self.soft_split0(x).transpose(1, 2)
 
-        W = int(W/self.soft_split0.stride[0])
-        H = int(H/self.soft_split0.stride[1])
+        W = int(np.ceil(W/self.soft_split0.stride[0]))
+        H = int(np.ceil(H/self.soft_split0.stride[1]))
 
         # iteration1: re-structurization/reconstruction
         x = self.attention1(x)
@@ -95,8 +95,8 @@ class T2T_module(nn.Module):
         # iteration1: soft split
         x = self.soft_split1(x).transpose(1, 2)
 
-        W = int(W/self.soft_split1.stride[0])
-        H = int(H/self.soft_split1.stride[1])
+        W = int(np.ceil(W/self.soft_split1.stride[0]))
+        H = int(np.ceil(H/self.soft_split1.stride[1]))
 
         # iteration2: re-structurization/reconstruction
         x = self.attention2(x)
