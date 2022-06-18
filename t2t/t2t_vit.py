@@ -50,9 +50,9 @@ class T2T_module(nn.Module):
 
         if tokens_type == 'transformer':
             print('adopt transformer encoder for tokens-to-token')
-            self.soft_split0 = nn.Unfold(kernel_size=(7, 7), stride=(4, 4), padding=(3, 3))
-            self.soft_split1 = nn.Unfold(kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
-            self.soft_split2 = nn.Unfold(kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            self.soft_split0 = nn.Unfold(kernel_size=(7, 7), stride=(8, 8), padding=(3, 3))
+            self.soft_split1 = nn.Unfold(kernel_size=(3, 3), stride=(8, 8), padding=(1, 1))
+            self.soft_split2 = nn.Unfold(kernel_size=(3, 3), stride=(4, 4), padding=(1, 1))
 
             self.attention1 = Token_transformer(dim=in_chans * 7 * 7, in_dim=token_dim, num_heads=1, mlp_ratio=1.0)
             self.attention2 = Token_transformer(dim=token_dim * 3 * 3, in_dim=token_dim, num_heads=1, mlp_ratio=1.0)
@@ -61,13 +61,22 @@ class T2T_module(nn.Module):
         elif tokens_type == 'performer':
             print('adopt performer encoder for tokens-to-token')
             self.soft_split0 = nn.Unfold(kernel_size=(7, 7), stride=(4, 4), padding=(3, 3))
-            self.soft_split1 = nn.Unfold(kernel_size=(3, 3), stride=(4, 4), padding=(1, 1))
+            self.soft_split1 = nn.Unfold(kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
             self.soft_split2 = nn.Unfold(kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+
+            self.soft_split3 = nn.Unfold(kernel_size=(7, 7), stride=(4, 4), padding=(3, 3))
+            self.soft_split4 = nn.Unfold(kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            self.soft_split5 = nn.Unfold(kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
 
             #self.attention1 = Token_performer(dim=token_dim, in_dim=in_chans*7*7, kernel_ratio=0.5)
             #self.attention2 = Token_performer(dim=token_dim, in_dim=token_dim*3*3, kernel_ratio=0.5)
             self.attention1 = Token_performer(dim=in_chans*7*7, in_dim=token_dim, kernel_ratio=0.5)
             self.attention2 = Token_performer(dim=token_dim*3*3, in_dim=token_dim, kernel_ratio=0.5)
+
+            self.attention3 = Token_performer(dim=token_dim*3*3, in_dim=token_dim, kernel_ratio=0.5)
+            self.attention4 = Token_performer(dim=token_dim*7*7, in_dim=token_dim, kernel_ratio=0.5)
+            self.attention5 = Token_performer(dim=token_dim*3*3, in_dim=token_dim, kernel_ratio=0.5)
+
             self.project = nn.Linear(token_dim * 3 * 3, embed_dim)
 
         elif tokens_type == 'convolution':  # just for comparison with conolution, not our model
@@ -104,6 +113,36 @@ class T2T_module(nn.Module):
         x = x.transpose(1,2).reshape(B, C, W, H)
         # iteration2: soft split
         x = self.soft_split2(x).transpose(1, 2)
+
+        W = int(np.ceil(W/self.soft_split2.stride[0]))
+        H = int(np.ceil(H/self.soft_split2.stride[1]))
+
+        # iteration3: re-structurization/reconstruction
+        x = self.attention3(x)
+        B, _, C = x.shape
+        x = x.transpose(1,2).reshape(B, C, W, H)
+        # iteration3: soft split
+        x = self.soft_split3(x).transpose(1, 2)
+
+        W = int(np.ceil(W/self.soft_split3.stride[0]))
+        H = int(np.ceil(H/self.soft_split3.stride[1]))
+
+        # iteration4: re-structurization/reconstruction
+        x = self.attention4(x)
+        B, _, C = x.shape
+        x = x.transpose(1,2).reshape(B, C, W, H)
+        # iteration4: soft split
+        x = self.soft_split4(x).transpose(1, 2)
+
+        W = int(np.ceil(W/self.soft_split4.stride[0]))
+        H = int(np.ceil(H/self.soft_split4.stride[1]))
+
+        # iteration5: re-structurization/reconstruction
+        x = self.attention5(x)
+        B, _, C = x.shape
+        x = x.transpose(1,2).reshape(B, C, W, H)
+        # iteration5: soft split
+        x = self.soft_split5(x).transpose(1, 2)
 
         # final tokens
         x = self.project(x).permute(0,2,1)
