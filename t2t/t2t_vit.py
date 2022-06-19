@@ -60,21 +60,21 @@ class T2T_module(nn.Module):
 
         elif tokens_type == 'performer':
             print('adopt performer encoder for tokens-to-token')
-            self.soft_split0 = nn.Unfold(kernel_size=(7, 7), stride=(4, 4), padding=(3, 3))
+            self.soft_split0 = nn.Unfold(kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
             self.soft_split1 = nn.Unfold(kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
             self.soft_split2 = nn.Unfold(kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
 
-            self.soft_split3 = nn.Unfold(kernel_size=(7, 7), stride=(4, 4), padding=(3, 3))
+            self.soft_split3 = nn.Unfold(kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
             self.soft_split4 = nn.Unfold(kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
-            self.soft_split5 = nn.Unfold(kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            self.soft_split5 = nn.Unfold(kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
 
             #self.attention1 = Token_performer(dim=token_dim, in_dim=in_chans*7*7, kernel_ratio=0.5)
             #self.attention2 = Token_performer(dim=token_dim, in_dim=token_dim*3*3, kernel_ratio=0.5)
-            self.attention1 = Token_performer(dim=in_chans*7*7, in_dim=token_dim, kernel_ratio=0.5)
+            self.attention1 = Token_performer(dim=in_chans*3*3, in_dim=token_dim, kernel_ratio=0.5)
             self.attention2 = Token_performer(dim=token_dim*3*3, in_dim=token_dim, kernel_ratio=0.5)
 
             self.attention3 = Token_performer(dim=token_dim*3*3, in_dim=token_dim, kernel_ratio=0.5)
-            self.attention4 = Token_performer(dim=token_dim*7*7, in_dim=token_dim, kernel_ratio=0.5)
+            self.attention4 = Token_performer(dim=token_dim*3*3, in_dim=token_dim, kernel_ratio=0.5)
             self.attention5 = Token_performer(dim=token_dim*3*3, in_dim=token_dim, kernel_ratio=0.5)
 
             self.project = nn.Linear(token_dim * 3 * 3, embed_dim)
