@@ -60,7 +60,7 @@ class LIE_module(nn.Module):
 
         lie_ch = [3] + (N-1) * [token_dim]
 
-        stride = [2, 2] + (K-2) * [1]
+        stride = [2, 2, 2] + (K-3) * [1]
 
         self.blocks = nn.ModuleList([
             LIE_T2T(tokens_type=tokens_type, k=3, s=2, in_chans=lie_ch[i], token_dim=token_dim, lie=True) for i in range(N)] + 
