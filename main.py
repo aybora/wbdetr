@@ -119,6 +119,7 @@ def main(args):
     random.seed(seed)
 
     model, criterion, postprocessors = build_model(args)
+    model.apply(utils.weights_init)
     model.to(device)
 
     model_without_ddp = model
