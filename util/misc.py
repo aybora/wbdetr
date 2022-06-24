@@ -470,4 +470,7 @@ def interpolate(input, size=None, scale_factor=None, mode="nearest", align_corne
 def weights_init(m):
     classname = m.__class__.__name__
     if classname.find('Linear') != -1:
-        torch.nn.init.xavier_uniform(m.weight.data, 1.)        
+        torch.nn.init.xavier_uniform_(m.weight.data, 1.)   
+    if classname.find('LayerNorm') != -1:
+        torch.nn.init.constant_(m.bias, 0)
+        torch.nn.init.constant_(m.weight, 1.0)       
