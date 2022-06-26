@@ -88,7 +88,7 @@ class Backbone(BackboneBase):
         #backbone = T2T_module(img_size=512, tokens_type='performer', in_chans=3, embed_dim=256, token_dim=32) #getattr(torchvision.models, name)(
             #replace_stride_with_dilation=[False, False, dilation],
             #pretrained=is_main_process(), norm_layer=FrozenBatchNorm2d)
-        backbone = LIE_module(N=2, K=8, tokens_type='performer', embed_dim=256, token_dim=32)
+        backbone = LIE_module(N=2, K=4, tokens_type='performer', embed_dim=256, token_dim=32)
         num_channels = 256
         super().__init__(backbone, train_backbone, num_channels, return_interm_layers)
 
