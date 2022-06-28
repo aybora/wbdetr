@@ -3,4 +3,4 @@
 # This source code is licensed under the Clear BSD License
 # LICENSE file in the root directory of this file
 # All rights reserved.
-from .t2t_vit import *
+from .lie_t2t import *
