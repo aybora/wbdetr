@@ -87,12 +87,6 @@ with torchscript transformer.
 
 COCO val5k evaluation results can be found in this [gist](https://gist.github.com/szagoruyko/9c9ebb8455610958f7deaa27845d7918).
 
-The models are also available via torch hub,
-to load DETR R50 with pretrained weights simply do:
-```python
-model = torch.hub.load('facebookresearch/detr:main', 'detr_resnet50', pretrained=True)
-```
-
 
 COCO panoptic val5k models:
 <table>
@@ -142,23 +136,12 @@ COCO panoptic val5k models:
   </tbody>
 </table>
 
-Checkout our [panoptic colab](https://colab.research.google.com/github/facebookresearch/detr/blob/colab/notebooks/DETR_panoptic.ipynb)
-to see how to use and visualize DETR's panoptic segmentation prediction.
-
-# Notebooks
-
-We provide a few notebooks in colab to help you get a grasp on DETR:
-* [DETR's hands on Colab Notebook](https://colab.research.google.com/github/facebookresearch/detr/blob/colab/notebooks/detr_attention.ipynb): Shows how to load a model from hub, generate predictions, then visualize the attention of the model (similar to the figures of the paper)
-* [Standalone Colab Notebook](https://colab.research.google.com/github/facebookresearch/detr/blob/colab/notebooks/detr_demo.ipynb): In this notebook, we demonstrate how to implement a simplified version of DETR from the grounds up in 50 lines of Python, then visualize the predictions. It is a good starting point if you want to gain better understanding the architecture and poke around before diving in the codebase.
-* [Panoptic Colab Notebook](https://colab.research.google.com/github/facebookresearch/detr/blob/colab/notebooks/DETR_panoptic.ipynb): Demonstrates how to use DETR for panoptic segmentation and plot the predictions.
-
-
 # Usage - Object detection
 There are no extra compiled components in DETR and package dependencies are minimal,
 so the code is very simple to use. We provide instructions how to install dependencies via conda.
 First, clone the repository locally:
 ```
-git clone https://github.com/facebookresearch/detr.git
+git clone https://github.com/aybora/wbdetr.git
 ```
 Then, install PyTorch 1.5+ and torchvision 0.6+:
 ```
@@ -170,11 +153,6 @@ conda install cython scipy
 pip install -U 'git+https://github.com/cocodataset/cocoapi.git#subdirectory=PythonAPI'
 ```
 That's it, should be good to train and evaluate detection models.
-
-(optional) to work with panoptic install panopticapi:
-```
-pip install git+https://github.com/cocodataset/panopticapi.git
-```
 
 ## Data preparation
 
@@ -199,19 +177,17 @@ To ease reproduction of our results we provide
 [results and training logs](https://gist.github.com/szagoruyko/b4c3b2c3627294fc369b899987385a3f)
 for 150 epoch schedule (3 days on a single machine), achieving 39.5/60.3 AP/AP50.
 
-We train DETR with AdamW setting learning rate in the transformer to 1e-4 and 1e-5 in the backbone.
+We train WB-DETR with AdamW setting learning rate in the transformer to 1e-4 and 1e-5 in the backbone.
 Horizontal flips, scales and crops are used for augmentation.
 Images are rescaled to have min size 800 and max size 1333.
 The transformer is trained with dropout of 0.1, and the whole model is trained with grad clip of 0.1.
 
 
 ## Evaluation
-To evaluate DETR R50 on COCO val5k with a single GPU run:
+To evaluate WB-DETR(2,4) on COCO val5k with a single GPU run:
 ```
 python main.py --batch_size 2 --no_aux_loss --eval --resume https://dl.fbaipublicfiles.com/detr/detr-r50-e632da11.pth --coco_path /path/to/coco
 ```
-We provide results for all DETR detection models in this
-[gist](https://gist.github.com/szagoruyko/9c9ebb8455610958f7deaa27845d7918).
 Note that numbers vary depending on batch size (number of images) per GPU.
 Non-DC5 models were trained with batch size 2, and DC5 with 1,
 so DC5 models show a significant drop in AP if evaluated with more
@@ -247,19 +223,6 @@ path/to/coco_panoptic/
 We recommend training segmentation in two stages: first train DETR to detect all the boxes, and then train the segmentation head.
 For panoptic segmentation, DETR must learn to detect boxes for both stuff and things classes. You can train it on a single node with 8 gpus for 300 epochs with:
 ```
-python -m torch.distributed.launch --nproc_per_node=8 --use_env main.py --coco_path /path/to/coco  --coco_panoptic_path /path/to/coco_panoptic --dataset_file coco_panoptic --output_dir /output/path/box_model
+python -m torch.distributed.launch --nproc_per_node=8 --use_env main.py --coco_path /path/to/coco --dataset_file coco --output_dir /output/path/box_model
 ```
 For instance segmentation, you can simply train a normal box model (or used a pre-trained one we provide).
-
-Once you have a box model checkpoint, you need to freeze it, and train the segmentation head in isolation.
-For panoptic segmentation you can train on a single node with 8 gpus for 25 epochs:
-```
-python -m torch.distributed.launch --nproc_per_node=8 --use_env main.py --masks --epochs 25 --lr_drop 15 --coco_path /path/to/coco  --coco_panoptic_path /path/to/coco_panoptic  --dataset_file coco_panoptic --frozen_weights /output/path/box_model/checkpoint.pth --output_dir /output/path/segm_model
-```
-For instance segmentation only, simply remove the `dataset_file` and `coco_panoptic_path` arguments from the above command line.
-
-# License
-DETR is released under the Apache 2.0 license. Please see the [LICENSE](LICENSE) file for more information.
-
-# Contributing
-We actively welcome your pull requests! Please see [CONTRIBUTING.md](.github/CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](.github/CODE_OF_CONDUCT.md) for more info.
