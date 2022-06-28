@@ -1,19 +1,17 @@
-**DE⫶TR**: End-to-End Object Detection with Transformers
+**WB-DE⫶TR**: Transformer-Based Detector without Backbone
 ========
 
-[![Support Ukraine](https://img.shields.io/badge/Support-Ukraine-FFD500?style=flat&labelColor=005BBB)](https://opensource.fb.com/support-ukraine)
 
-PyTorch training code and pretrained models for **DETR** (**DE**tection **TR**ansformer).
-We replace the full complex hand-crafted object detection pipeline with a Transformer, and match Faster R-CNN with a ResNet-50, obtaining **42 AP** on COCO using half the computation power (FLOPs) and the same number of parameters. Inference in 50 lines of PyTorch.
+PyTorch training code and pretrained models for **WB-DETR**.
 
-![DETR](.github/DETR.png)
-
-**What it is**. Unlike traditional computer vision techniques, DETR approaches object detection as a direct set prediction problem. It consists of a set-based global loss, which forces unique predictions via bipartite matching, and a Transformer encoder-decoder architecture. 
-Given a fixed small set of learned object queries, DETR reasons about the relations of the objects and the global image context to directly output the final set of predictions in parallel. Due to this parallel nature, DETR is very fast and efficient.
+**What it is**. we implemented the first pure-transformer detector WB-DETR (DETR-Based Detector without Backbone). The new model is only composed of an encoder and a decoder without any CNN-based backbones. Instead of utilizing a CNN to extract features, WB-DETR serializes the image directly and encodes the local features of input into each individual token. Besides, to allow WB-DETR better make up the deficiency of transformer in modeling local information, we design a LIE-T2T (Local Information Enhancement Tokens-to Token) module to modulate the internal (local) information of each token after unfold- ing. Unlike other traditional detectors, WB-DETR with- out backbone is more unify and neat. Experimental results demonstrate that WB-DETR, the first pure-transformer de- tector without CNN to our knowledge, yields on par accu- racy and faster inference speed with only half number of parameters compared with DETR baseline.
 
 **About the code**. We believe that object detection should not be more difficult than classification,
 and should not require complex libraries for training and inference.
-DETR is very simple to implement and experiment with, and we provide a
+WB-DETR is very simple to implement and experiment with, and we provide a
+
+**Q:should we also add a colab notebook as demo?**
+
 [standalone Colab Notebook](https://colab.research.google.com/github/facebookresearch/detr/blob/colab/notebooks/detr_demo.ipynb)
 showing how to do inference with DETR in only a few lines of PyTorch code.
 Training code follows this idea - it is not a library,
@@ -22,10 +20,11 @@ definitions with standard training loops.
 
 Additionnally, we provide a Detectron2 wrapper in the d2/ folder. See the readme there for more information.
 
-For details see [End-to-End Object Detection with Transformers](https://ai.facebook.com/research/publications/end-to-end-object-detection-with-transformers) by Nicolas Carion, Francisco Massa, Gabriel Synnaeve, Nicolas Usunier, Alexander Kirillov, and Sergey Zagoruyko.
+For details see [Transformer-Based Detector without Backbone](https://openaccess.thecvf.com/content/ICCV2021/papers/Liu_WB-DETR_Transformer-Based_Detector_Without_Backbone_ICCV_2021_paper.pdf) by Fanfan Liu, Haoran Wei, Wenzhe Zhao, Guozhen Li, Jingquan Peng, Zihao Li.
 
 # Model Zoo
-We provide baseline DETR and DETR-DC5 models, and plan to include more in future.
+**ADD TABLE OF EXPERIMENTS AND RESULTS**
+We provide baseline WB-DETR models.
 AP is computed on COCO 2017 val5k, and inference time is over the first 100 val5k COCO images,
 with torchscript transformer.
 
