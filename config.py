@@ -85,6 +85,7 @@ def get_args_parser(add_help=True):
     parser.add_argument('--world_size', default=1, type=int,
                         help='number of distributed processes')
     parser.add_argument('--dist_url', default='env://', help='url used to set up distributed training')
+    parser.add_argument('--cfg', default=None, help='Config file for experiment')
     return parser
 
 
@@ -93,8 +94,10 @@ def get_arguments():
     parser = get_args_parser()
     # get default arguments from config.py
     args = parser.parse_args([])
+    print("args", args)
     # get arguments from command line
     args_command, _ = parser._parse_known_args(sys.argv[1:], argparse.Namespace())
+    print("args_command",args_command)
     # get the arguments given in the command line, and keep them
     difference = {}
     for key, value in vars(args_command).items():

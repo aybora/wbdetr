@@ -79,10 +79,6 @@ def main(args):
     else:
         base_ds = get_coco_api_from_dataset(dataset_val)
 
-    if args.frozen_weights is not None:
-        checkpoint = torch.load(args.frozen_weights, map_location='cpu')
-        model_without_ddp.detr.load_state_dict(checkpoint['model'])
-
     output_dir = Path(args.output_dir)
     if args.resume:
         if args.resume.startswith('https'):
@@ -156,8 +152,7 @@ def main(args):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser('WB-DETR training and evaluation script', parents=[get_arguments()])
-    args = parser.parse_args()
+    args = get_arguments()
     if args.output_dir:
         Path(args.output_dir).mkdir(parents=True, exist_ok=True)
         store_yaml(args)
