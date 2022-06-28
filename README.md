@@ -4,7 +4,7 @@
 
 PyTorch training code and pretrained models for **WB-DETR**.
 
-**What it is**. we implemented the first pure-transformer detector WB-DETR (DETR-Based Detector without Backbone). The new model is only composed of an encoder and a decoder without any CNN-based backbones. Instead of utilizing a CNN to extract features, WB-DETR serializes the image directly and encodes the local features of input into each individual token. Besides, to allow WB-DETR better make up the deficiency of transformer in modeling local information, we design a LIE-T2T (Local Information Enhancement Tokens-to Token) module to modulate the internal (local) information of each token after unfold- ing. Unlike other traditional detectors, WB-DETR with- out backbone is more unify and neat. Experimental results demonstrate that WB-DETR, the first pure-transformer de- tector without CNN to our knowledge, yields on par accu- racy and faster inference speed with only half number of parameters compared with DETR baseline.
+**What it is**. we implemented the first pure-transformer detector WB-DETR (DETR-Based Detector without Backbone). The new model is only composed of an encoder and a decoder without any CNN-based backbones. Instead of utilizing a CNN to extract features, WB-DETR serializes the image directly and encodes the local features of input into each individual token. Besides, to allow WB-DETR better make up the deficiency of transformer in modeling local information, we design a LIE-T2T (Local Information Enhancement Tokens-to Token) module to modulate the internal (local) information of each token after unfolding. Unlike other traditional detectors, WB-DETR without backbone is more unify and neat. Experimental results demonstrate that WB-DETR, the first pure-transformer detector without CNN to our knowledge, yields on par accu- racy and faster inference speed with only half number of parameters compared with DETR baseline.
 
 **About the code**. We believe that object detection should not be more difficult than classification,
 and should not require complex libraries for training and inference.
@@ -169,7 +169,7 @@ path/to/coco/
 ## Training
 To train baseline DETR on a single node with 8 gpus for 300 epochs run:
 ```
-python -m torch.distributed.launch --nproc_per_node=8 --use_env main.py --coco_path /path/to/coco 
+python -m torch.distributed.launch --nproc_per_node=8 --use_env main.py --cfg config.yaml
 ```
 A single epoch takes 28 minutes, so 300 epoch training
 takes around 6 days on a single machine with 8 V100 cards.
@@ -186,7 +186,7 @@ The transformer is trained with dropout of 0.1, and the whole model is trained w
 ## Evaluation
 To evaluate WB-DETR(2,4) on COCO val5k with a single GPU run:
 ```
-python main.py --batch_size 2 --no_aux_loss --eval --resume https://dl.fbaipublicfiles.com/detr/detr-r50-e632da11.pth --coco_path /path/to/coco
+python main.py --batch_size 2 --eval --resume wbdetr.pth --cfg
 ```
 Note that numbers vary depending on batch size (number of images) per GPU.
 Non-DC5 models were trained with batch size 2, and DC5 with 1,
@@ -223,6 +223,6 @@ path/to/coco_panoptic/
 We recommend training segmentation in two stages: first train DETR to detect all the boxes, and then train the segmentation head.
 For panoptic segmentation, DETR must learn to detect boxes for both stuff and things classes. You can train it on a single node with 8 gpus for 300 epochs with:
 ```
-python -m torch.distributed.launch --nproc_per_node=8 --use_env main.py --coco_path /path/to/coco --dataset_file coco --output_dir /output/path/box_model
+python -m torch.distributed.launch --nproc_per_node=8 --use_env main.py --cfg
 ```
 For instance segmentation, you can simply train a normal box model (or used a pre-trained one we provide).
