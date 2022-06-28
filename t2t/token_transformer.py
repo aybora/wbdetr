@@ -10,6 +10,7 @@ import torch.nn as nn
 from timm.models.layers import DropPath
 from .transformer_block import Mlp
 
+
 class Attention(nn.Module):
     def __init__(self, dim, num_heads=8, in_dim = None, qkv_bias=False, qk_scale=None, attn_drop=0., proj_drop=0.):
         super().__init__()

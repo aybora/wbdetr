@@ -2,19 +2,14 @@
 """
 Backbone modules.
 """
-from collections import OrderedDict
 
 import torch
 import torch.nn.functional as F
-import torchvision
 from torch import nn
-from torchvision.models._utils import IntermediateLayerGetter
 from typing import Dict, List
-from t2t.t2t_vit import T2T_module
 from t2t.lie_t2t import LIE_module
 
-from util.misc import NestedTensor, is_main_process
-
+from util.misc import NestedTensor
 from .position_encoding import build_position_encoding
 
 
@@ -61,16 +56,13 @@ class BackboneBase(nn.Module):
 
     def __init__(self, backbone: nn.Module, train_backbone: bool, num_channels: int, return_interm_layers: bool):
         super().__init__()
-        
-        #return_layers = {"project": "backbone"}
-        #self.body = IntermediateLayerGetter(backbone, return_layers=return_layers)
+
         self.body = backbone
         self.num_channels = num_channels
 
     def forward(self, tensor_list: NestedTensor):
         xs = self.body(tensor_list.tensors)
         out: Dict[str, NestedTensor] = {}
-        #for name, x in xs.items():
         name = '0'
         m = tensor_list.mask.flatten(1)
         assert m is not None
@@ -84,11 +76,13 @@ class Backbone(BackboneBase):
     def __init__(self, name: str,
                  train_backbone: bool,
                  return_interm_layers: bool,
-                 dilation: bool):
-        #backbone = T2T_module(img_size=512, tokens_type='performer', in_chans=3, embed_dim=256, token_dim=32) #getattr(torchvision.models, name)(
-            #replace_stride_with_dilation=[False, False, dilation],
-            #pretrained=is_main_process(), norm_layer=FrozenBatchNorm2d)
-        backbone = LIE_module(N=2, K=4, tokens_type='performer', embed_dim=256, token_dim=32)
+                 dilation: bool,
+                 N=2, K=4):
+
+        if name == "t2t":
+            backbone = LIE_module(N=N, K=K, tokens_type='performer', embed_dim=256, token_dim=32, lie=False)
+        elif name == "lie_t2t":
+            backbone = LIE_module(N=N, K=K, tokens_type='performer', embed_dim=256, token_dim=32, lie=True)
         num_channels = 256
         super().__init__(backbone, train_backbone, num_channels, return_interm_layers)
 
@@ -113,7 +107,7 @@ def build_backbone(args):
     position_embedding = build_position_encoding(args)
     train_backbone = args.lr_backbone > 0
     return_interm_layers = args.masks
-    backbone = Backbone(args.backbone, train_backbone, return_interm_layers, args.dilation)
+    backbone = Backbone(args.backbone, train_backbone, return_interm_layers, args.dilation, args.n, args.k)
     model = Joiner(backbone, position_embedding)
     model.num_channels = backbone.num_channels
     return model

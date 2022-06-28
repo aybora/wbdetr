@@ -29,7 +29,7 @@ class LIE_T2T(nn.Module):
             self.attention = Token_transformer(dim=in_chans * k * k, in_dim=token_dim, num_heads=1, mlp_ratio=1.0)
         elif tokens_type == 'performer':
             self.attention = Token_performer(dim=in_chans * k * k, in_dim=token_dim, kernel_ratio=0.5)
-        if lie==True:
+        if lie == True:
             self.lie = LIE(token_dim=token_dim)
         else:
             self.lie = None
@@ -50,12 +50,12 @@ class LIE_T2T(nn.Module):
             W = int(np.ceil(W/self.lie.unfold.stride[0]))
             H = int(np.ceil(H/self.lie.unfold.stride[1]))
 
-        x = x.transpose(1,2).reshape(B, C, W, H)
+        x = x.transpose(1, 2).reshape(B, C, W, H)
 
         return x, W, H
 
 class LIE_module(nn.Module):
-    def __init__(self, N=2, K=4, tokens_type='performer', embed_dim=256, token_dim=32):
+    def __init__(self, N=2, K=4, tokens_type='performer', embed_dim=256, token_dim=32, lie=True):
         super().__init__()
 
         lie_ch = [3] + (N-1) * [token_dim]
@@ -63,8 +63,8 @@ class LIE_module(nn.Module):
         stride = [2, 2, 2] + (K-3) * [1]
 
         self.blocks = nn.ModuleList([
-            LIE_T2T(tokens_type=tokens_type, k=3, s=2, in_chans=lie_ch[i], token_dim=token_dim, lie=True) for i in range(N)] + 
-            [LIE_T2T(tokens_type=tokens_type, k=3, s=stride[i], in_chans=token_dim, token_dim=token_dim, lie=False) for i in range(K)])
+            LIE_T2T(tokens_type=tokens_type, k=3, s=2, in_chans=lie_ch[i], token_dim=token_dim, lie=lie) for i in range(N)] +
+            [LIE_T2T(tokens_type=tokens_type, k=3, s=stride[i], in_chans=token_dim, token_dim=token_dim, lie=lie) for i in range(K)])
 
         self.final_unfold = nn.Unfold(kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
         self.project = nn.Linear(token_dim * 3 * 3, embed_dim)

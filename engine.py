@@ -11,7 +11,6 @@ import torch
 
 import util.misc as utils
 from datasets.coco_eval import CocoEvaluator
-from datasets.panoptic_eval import PanopticEvaluator
 
 
 def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
@@ -76,14 +75,6 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, out
     iou_types = tuple(k for k in ('segm', 'bbox') if k in postprocessors.keys())
     coco_evaluator = CocoEvaluator(base_ds, iou_types)
     # coco_evaluator.coco_eval[iou_types[0]].params.iouThrs = [0, 0.1, 0.5, 0.75]
-
-    panoptic_evaluator = None
-    if 'panoptic' in postprocessors.keys():
-        panoptic_evaluator = PanopticEvaluator(
-            data_loader.dataset.ann_file,
-            data_loader.dataset.ann_folder,
-            output_dir=os.path.join(output_dir, "panoptic_eval"),
-        )
 
     for samples, targets in metric_logger.log_every(data_loader, 10, header):
         samples = samples.to(device)
