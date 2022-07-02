@@ -231,5 +231,5 @@ with torchscript transformer.
 
 # Contact
 
-@TODO: Provide your names & email addresses and any other info with which people can contact you.
+[Güneş Çepiç](https://github.com/gunescepic), [Aybora Köksal](https://github.com/aybora)
 
