@@ -6,7 +6,7 @@ This project aims to reproduce the results presented in the in the paper  [WB-DE
 
 ## 1.1. Paper summary
 
-The first pure-transformer detector WB-DETR (DETR-Based Detector without Backbone) is only composed of an encoder and a decoder without any CNN-based backbones. Instead of utilizing a CNN to extract features, WB-DETR serializes the image directly and encodes the local features of input into each individual token. Besides, to allow WB-DETR better make up the deficiency of transformer in modeling local information, we design a LIE-T2T (Local Information Enhancement Tokens-to Token) module to modulate the internal (local) information of each token after unfolding. Unlike other traditional detectors, WB-DETR without backbone is more unify and neat. Experimental results demonstrate that WB-DETR, the first pure-transformer detector without CNN, yields on par accuracy and faster inference speed with only half number of parameters compared with DETR baseline.
+The first pure-transformer detector WB-DETR (DETR-Based Detector without Backbone) is only composed of an encoder and a decoder without any CNN-based backbones. Instead of utilizing a CNN to extract features, WB-DETR serializes the image directly and encodes the local features of input into each individual token. Besides, to allow WB-DETR better make up the deficiency of transformer in modeling local information, a LIE-T2T (Local Information Enhancement Tokens-to Token) module is designed to modulate the internal (local) information of each token after unfolding. Unlike other traditional detectors, WB-DETR without backbone is more unify and neat. Experimental results demonstrate that WB-DETR, the first pure-transformer detector without CNN, yields on par accuracy and faster inference speed with only half number of parameters compared with DETR baseline.
 
 # 2. The method and my interpretation
 
@@ -17,11 +17,9 @@ The first pure-transformer detector WB-DETR (DETR-Based Detector without Backbon
 </p>
 
 
-Unlike previous CNN-based works, DETR is a transformer- based detector, which eliminates many hand- crafted operations, e.g., anchor generation, rule-based object assignment, non-maximum suppression (NMS) post- processing, and so on. As shown figure above (a), DETR applies a simple architecture that combined with a CNN backbone and paired transformer encoder-decoder to output a set of box predictions, which simplifies the pipeline of object detection to an extent. However, DETR is also influenced by the modular splicing design and still relies on CNN to extract features, which makes the model not unify and neat enough.
+Unlike previous CNN-based works, DETR is a transformer- based detector, which eliminates many hand-crafted operations, e.g., anchor generation, rule-based object assignment, non-maximum suppression (NMS) post-processing, and so on. As shown figure above (a), DETR applies a simple architecture that combined with a CNN backbone and paired transformer encoder-decoder to output a set of box predictions, which simplifies the pipeline of object detection to an extent. However, DETR is also influenced by the modular splicing design and still relies on CNN to extract features, which makes the model not unify and neat enough.
 
-Vision Transformer (ViT) is the first pure-transformer model that can be directly applied for image classification. It splits the input image into 16 × 16 patches with fixed length. Then, an encoder sub-module is run to conduct sequence modeling of patches to obtain classification results. Unfortunately, ViT achieves inferior performance compared with CNN, since the simple tokenization of input images fails to model the important local structure (e.g., edges, lines) among neighboring pixels. T2T- ViT (Tokens-to Token Vision Transformer) solves the above problem by recursively aggregating neighboring tokens into one token. In this way, not only the local structure presented by surrounding tokens that can be modulated, the tokens length also can be reduced. The performance of T2T- VIT exceeds that of the classifier designed by CNN, which proves that the transformer is also capable of extracting shallow features. And thus, a natural problem is: is the CNN- backbone in DETR redundant?
-
-
+Vision Transformer (ViT) is the first pure-transformer model that can be directly applied for image classification. It splits the input image into 16 × 16 patches with fixed length. Then, an encoder sub-module is run to conduct sequence modeling of patches to obtain classification results. Unfortunately, ViT achieves inferior performance compared with CNN, since the simple tokenization of input images fails to model the important local structure (e.g., edges, lines) among neighboring pixels. T2T- ViT (Tokens-to Token Vision Transformer) solves the above problem by recursively aggregating neighboring tokens into one token. In this way, not only the local structure presented by surrounding tokens that can be modulated, the tokens length also can be reduced. The performance of T2T- VIT exceeds that of the classifier designed by CNN, which proves that the transformer is also capable of extracting shallow features. And thus, a natural problem is: is the CNN-backbone in DETR redundant?
 
 ### 2.1.1 Image To Tokens
 
@@ -31,10 +29,8 @@ Vision Transformer (ViT) is the first pure-transformer model that can be directl
 
 The process of Image to Tokens. Take an input image with 512×512×3 as an example. Firstly, the image is cut to 1024 patches with the size of 32×32 × 3. Then, each patch is reshaped to one-dimensional. Finally, a trainable linear projection is performed to yield required tokens.
 
-They follow the ViT to handle 2D images. Firstly, They cut the image to a size of (p,p) with a step size of (s,s). In this way, the input image x ∈ Rh×w×c is reshaped into a sequence of flattened 2D patches xp ∈ Rl×cp , where h and w are the height and width of the original image, c is the number of channels, and l represents the length of patch. Among them,l=hxws^2,c_p =p2×c.
-l also serves as the effective input sequence length for the transformer encoder. Their LIE-T2T encoder employs constant latent vector size d through all of its layers. And thus, they flatten and map the patches to d dimensions with a trainable linear projection. More specifically, this linear projection has an input and output dimensions of cp and d, respectively. They name the output of this projection as the tokens T0.
-
-
+They follow the ViT to handle 2D images. Firstly, They cut the image to a size of ($p, p$) with a step size of ($s, s$). In this way, the input image $x \in R^{h \times w \times c}$ is reshaped into a sequence of flattened 2D patches $x_p \in R^{l \times c_p} , where $h$ and $w$ are the height and width of the original image, $c$ is the number of channels, and $l$ represents the length of patch. Among them, $l= \frac{h \times w}{s^2}$, $c_p = p^2 \times c$.
+$l$ also serves as the effective input sequence length for the transformer encoder. Their LIE-T2T encoder employs constant latent vector size $d$ through all of its layers. And thus, they flatten and map the patches to d dimensions with a trainable linear projection. More specifically, this linear projection has an input and output dimensions of $c_p$ and $d$, respectively. They name the output of this projection as the tokens $T_0$.
 
 ### 2.1.2 LIE-T2T encoder
 <p align="center">
@@ -45,7 +41,6 @@ After the process of image to tokens, they add positional encodings to target to
 Since they do not use any CNN-based backbone to extract image features, instead of directly serializing the image, the local information of the image is encoded in each independent token. 
 
 <img width="466" alt="Screen Shot 2022-07-02 at 15 42 44" src="https://user-images.githubusercontent.com/43934455/177001213-c24de276-4e64-4ee7-ab49-7926ca47b0b1.png" align="left" style="width:300px;"/>
-
 
 Concretely, LIE-T2T module calculates attention on the channel-dimension of each token. The attention is calculated separately for each token. More detailed iterative pro- cess of LIE-T2T module is shown in Figure 5, which can also be formulated as follows:
 - $T$ = $Unfold$($Reshape$($T_{i}$))                              
@@ -86,22 +81,23 @@ where α is the loss weight, balancing the object and “no object” samples, w
 
 The regression loss of the bounding box consists of two parts: L1 loss and IoU loss as follows.
 
-
 <img width="598" alt="Screen Shot 2022-07-02 at 15 49 12" src="https://user-images.githubusercontent.com/43934455/177001452-f19c1be1-a530-4a74-9ffe-232852e73dba.png" align="left" style="width:300px;"/> where γ and η are the balanced-weights of $L_{1}$ and $L_{iou}$. ˆb and b represent the regressed and ground-truth bounding box, respectively.
 
 <br clear="left"/>
 
 ## 2.2. Our interpretation 
 
-@TODO: Explain the parts that were not clearly explained in the original paper and how you interpreted them.
+In our interpretation, mainly original [DETR](https://github.com/facebookresearch/detr) code is used for transformer decoder model initialization and forward, model parallelizing, training, evaluation, data read, data augmentation etc. All of our changes are applied to the backbone part of the code. For token transformer and token performer parts are taken from [T2T-ViT code](https://github.com/yitu-opensource/T2T-ViT) and our image to token and LIE-T2T implementations are inspired from the same code. In Section 3.2 of the paper, positional encoding process is introduced as a 1D process, in contrast to the 2D positional embedding in DETR. For that, Positional encoding code of DETR paper is adapted to 1D by us. 
+
+In the paper, none of the kernel sizes, padding or stride of any Unfold layer is explained. Kernel sizes are assumed by 3 and padding is assumed as 1 since they are the most common options in a backbone. However, larger kernel sizes may affect the model like a deeper network and it may create a performance difference with better/worse results. Stride is selected as 2 for first M layers and 1 for the rest, and M is selected as 5 in order to match 32 step size. Lower step size causes exponential GPU usage for our case, which causes CUDA out of memory error. Higher step size causes exponentially worse detection performence. 
 
 # 3. Experiments and results
 
 ## 3.1. Experimental setup
 
-@TODO: Describe the setup of the original paper and whether you changed any settings.
-The main settings and training strategy of our WB- DETR are mainly followed by DETR for better comparisons. All transformer weights are initialized with Xavier Init, and our model has no pre-train process on any external dataset. By default, models are trained for 500 epochs with a learning rate drop 10× at the 400 epoch. We optimize WB-DETR via an Adam optimizer with a base learning rate of 1e−4 and a weight decay of 0.001. We use a batch size of 32 and train the network on 16 V100 GPUs with 4 images per-GPU. We use some standard data augmentations, such as random resizing, color jittering, random flip- ping and so on to overcome the overfitting. The transformer is trained with a default dropout of 0.1. We fix the number of decoding layers at 6 and report performance with the dif- ferent layer number N and K of encoder: When N and K is n and k, the corresponding model is named as $WB-DETR_{nk}$ .
+The paper introduces their experimental setup as follows: The main settings and training strategy of WB-DETR are mainly followed by DETR for better comparisons. All transformer weights are initialized with Xavier Init, and our model has no pre-train process on any external dataset. By default, models are trained for 500 epochs with a learning rate drop 10× at the 400 epoch. We optimize WB-DETR via an Adam optimizer with a base learning rate of 1e−4 and a weight decay of 0.001. We use a batch size of 32 and train the network on 16 V100 GPUs with 4 images per-GPU. We use some standard data augmentations, such as random resizing, color jittering, random flipping and so on to overcome the overfitting. The transformer is trained with a default dropout of 0.1. We fix the number of decoding layers at 6 and report performance with the different layer number N and K of encoder: When N and K is n and k, the corresponding model is named as $WB-DETR_{nk}$.
 
+We have tried to follow the same experimental setup as explained in the paper, except the batch size. Since we have used a TUBITAK TRUBA instance for intensive training, we have used 8 NVIDIA A100 GPUs with 12 images per-GPU. The batch size explained in the paper's setup section is not clear, as they  firstly say that their batch size is 32, then 4 images for each of 16 GPUs (64). In any way, we were able to use higher batch size (96), in order to have faster convergence in a limited time.
 
 ## 3.2. Running the code
 
@@ -135,7 +131,7 @@ path/to/coco/
 ```
 
 ### 3.2.2 Training
-To train baseline WBDETR on a single node with 8 gpus for 300 epochs run:
+To train baseline WBDETR on a single node with 8 gpus for 500 epochs run:
 ```
 python -m torch.distributed.launch --nproc_per_node=8 --use_env main.py --cfg config.yaml
 ```
@@ -143,7 +139,7 @@ python -m torch.distributed.launch --nproc_per_node=8 --use_env main.py --cfg co
 ### 3.2.3 Evaluation
 To evaluate WB-DETR(2,8) on COCO val5k with a single GPU run:
 ```
-python main.py --batch_size 2 --eval --resume wbdetr.pth --cfg
+python main.py --batch_size 2 --eval --resume wbdetr.pth --cfg config.yaml
 ```
 Note that numbers vary depending on batch size (number of images) per GPU.
 Non-DC5 models were trained with batch size 2, and DC5 with 1,
@@ -155,6 +151,7 @@ than 1 image per GPU.
 @TODO: Present your results and compare them to the original paper. Please number your figures & tables as if this is a paper.
 PyTorch training code and pretrained models for **WB-DETR**.
 
+Our code is able to any (N,K) pair in WB-DETR(N-K) experiments. Yet, due to the limitation in computational resources only two experiments are done. One of it is WB-DETR (0-4) for ~350 epochs and the other is WB-DETR(2-8) for ~500 epochs. 
 
 # Model Zoo
 **ADD TABLE OF EXPERIMENTS AND RESULTS**
@@ -167,54 +164,44 @@ with torchscript transformer.
     <tr style="text-align: right;">
       <th></th>
       <th>name</th>
-      <th>backbone</th>
-      <th>schedule</th>
-      <th>inf_time</th>
-      <th>box AP</th>
+      <th>patch</th>
+      <th>step size</th>
+      <th>epochs</th>
+      <th>AP 0.5:0.95 (%)</th>
+      <th>AP 0.5 (%)</th>
       <th>url</th>
-      <th>size</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>0</th>
-      <td>DETR</td>
-      <td>R50</td>
+      <td>0</td>
+      <td>WB-DETR(2-8) paper</td>
+      <td>32</td>
+      <td>32</td>
       <td>500</td>
-      <td>0.036</td>
-      <td>42.0</td>
-      <td><a href="https://dl.fbaipublicfiles.com/detr/detr-r50-e632da11.pth">model</a>&nbsp;|&nbsp;<a href="https://dl.fbaipublicfiles.com/detr/logs/detr-r50_log.txt">logs</a></td>
-      <td>159Mb</td>
+      <td>33.9</td>
+      <td>61.0</td>
+      <td></td>
     </tr>
     <tr>
-      <th>1</th>
-      <td>DETR-DC5</td>
-      <td>R50</td>
+      <td>1</td>
+      <td>WB-DETR(2-8) ours</td>
+      <td>32</td>
+      <td>32</td>
       <td>500</td>
-      <td>0.083</td>
-      <td>43.3</td>
-      <td><a href="https://dl.fbaipublicfiles.com/detr/detr-r50-dc5-f0fb7ef5.pth">model</a>&nbsp;|&nbsp;<a href="https://dl.fbaipublicfiles.com/detr/logs/detr-r50-dc5_log.txt">logs</a></td>
-      <td>159Mb</td>
+      <td>22.3</td>
+      <td>38.0</td>
+      <td><a href="https://users.metu.edu.tr/aybora/data/checkpoint.pth">model</a>&nbsp;|&nbsp;<a href="https://users.metu.edu.tr/aybora/data/log6.txt">logs</a></td>
     </tr>
     <tr>
-      <th>2</th>
-      <td>DETR</td>
-      <td>R101</td>
-      <td>500</td>
-      <td>0.050</td>
-      <td>43.5</td>
-      <td><a href="https://dl.fbaipublicfiles.com/detr/detr-r101-2c7b67e5.pth">model</a>&nbsp;|&nbsp;<a href="https://dl.fbaipublicfiles.com/detr/logs/detr-r101_log.txt">logs</a></td>
-      <td>232Mb</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>DETR-DC5</td>
-      <td>R101</td>
-      <td>500</td>
-      <td>0.097</td>
-      <td>44.9</td>
-      <td><a href="https://dl.fbaipublicfiles.com/detr/detr-r101-dc5-a2e86def.pth">model</a>&nbsp;|&nbsp;<a href="https://dl.fbaipublicfiles.com/detr/logs/detr-r101-dc5_log.txt">logs</a></td>
-      <td>232Mb</td>
+      <td>2</td>
+      <td>WB-DETR(0-4) ours</td>
+      <td>32</td>
+      <td>32</td>
+      <td>341</td>
+      <td>14.4</td>
+      <td>27.0</td>
+      <td><a href="https://users.metu.edu.tr/aybora/data/checkpoint2.pth">model</a>&nbsp;|&nbsp;<a href="https://users.metu.edu.tr/aybora/data/log2.txt">logs</a></td>
     </tr>
   </tbody>
 </table>
