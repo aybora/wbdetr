@@ -104,8 +104,13 @@ def get_arguments():
         difference[key] = value
 
     # update args wrt config file if given in the command line
-    if args_command.cfg is not None:
-        with open(args_command.cfg) as file:
+    try:
+         arg_cmd = args_command.cfg
+    except AttributeError:
+        arg_cmd = None
+            
+    if arg_cmd.cfg is not None:
+        with open(arg_cmd.cfg) as file:
             config = yaml.safe_load(file)
         for key, value in config.items():
             if args.__contains__(key):
