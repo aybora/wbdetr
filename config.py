@@ -109,8 +109,8 @@ def get_arguments():
     except AttributeError:
         arg_cmd = None
             
-    if arg_cmd.cfg is not None:
-        with open(arg_cmd.cfg) as file:
+    if arg_cmd is not None:
+        with open(arg_cmd) as file:
             config = yaml.safe_load(file)
         for key, value in config.items():
             if args.__contains__(key):
