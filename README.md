@@ -128,8 +128,7 @@ PyTorch training code and pretrained models for **WB-DETR**.
 Our code is able to any (N,K) pair in WB-DETR(N-K) experiments. Yet, due to the limitation in computational resources only two experiments are done. One of it is WB-DETR (0-4) for ~350 epochs and the other is WB-DETR(2-8) for ~500 epochs. 
 
 We provide baseline WB-DETR models.
-AP is computed on COCO 2017 val5k, and inference time is over the first 100 val5k COCO images,
-with torchscript transformer.
+AP is computed on COCO 2017 val5k.
 
 <table>
   <thead>
