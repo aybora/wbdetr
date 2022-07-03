@@ -198,10 +198,11 @@ Here is the comparison of WB-DETR(2-8) (LIE-T2T) and WB-DETR(0-4) (T2T) models.
 
 <img width="706" alt="Screen Shot 2022-07-03 at 19 06 41" src="https://user-images.githubusercontent.com/43934455/177047846-4509b4f1-c7ab-4e56-bd99-23081da8d1b3.png">
 
+According to the results, even though it is not fair to compare with different number of layers and epochs, it can be seen that LIE-T2T outperforms the original T2T by enchancing local information. For LIE-T2T, learning rate is dropped at 400th epoch and it increases the performance even more. 
 
 # 4. Conclusion
 
-@TODO: Discuss the paper in relation to the results in the paper and your results.
+Our results are worse than the proposed results. There might be a couple of differences between the original method and our interpretation such as kernel sizes, padding or stride of Unfold layers. It is not clear that if the original method uses transformer or performers, we used performer in LIE-T2T encoder because of limitation in hardware. We did our experiments using 32 step size because lower step size causes exponential GPU usage for our case, which causes CUDA out of memory error. Higher step size causes exponentially worse detection performence. 
 
 # 5. References
 
