@@ -62,6 +62,8 @@ As we all know, the self-attention of transformer has strong global informa- tio
 
 Additionally, as the length of tokens in the T2T module[2] is larger than the normal case (16 × 16) in ViT[3], the MACs and memory usage are huge. To address the limitations, in our T2T module[2], we set the channel dimension of the T2T layer small (32 or 64) to reduce MACs, and optionally adopt an efficient Transformer such as Performer [4] layer to reduce memory usage at limited GPU memory. 
 
+Performers[5] are a new class of models and they approximate the Transformers. They do so without running into the classic transformer bottleneck which is that, the Attention matrix in the transformer has space and compute requirements that are quadratic in the size of the input, and that limits how much input (text or images) you can feed into the model. Performers get around this problem by a technique called Fast Attention Via Positive Orthogonal Random Features (FAVOR+). Performers are linear architectures fully compatible with regular Transformers and with strong theoretical guarantees: unbiased or nearly-unbiased estimation of the attention matrix, uniform convergence, and low estimation variance. Performers; capable of provably accurate and practical estimation of regular (softmax) full-rank attention, but of only linear space and time complexity and not relying on any priors such as sparsity or low-rankness. Performers are the first linear architectures fully compatible (via small amounts of fine-tuning) with regular Transformers.
+
 
 
 ## 2.2. Our interpretation 
@@ -207,7 +209,7 @@ Here is the comparison of WB-DETR(2-8) (LIE-T2T) and WB-DETR(0-4) (T2T) models.
 - [2] Li Yuan, Yunpeng Chen, Tao Wang, Weihao Yu, Yujun Shi, Zihang Jiang, Francis EH Tay, Jiashi Feng, Shuicheng Yan, "Tokens-to-Token ViT: Training Vision Transformers from Scratch on ImageNet", Computer Vision and Pattern Recognition (CVPR) 2021, doi: 10.48550/ARXIV.2101.11986
 - [3] Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn, Xiaohua Zhai, Thomas Unterthiner, Mostafa Dehghani, Matthias Minderer, Georg Heigold, Sylvain Gelly, Jakob Uszkoreit, Neil Houlsby, "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale", Computer Vision and Pattern Recognition (CVPR) 2021, doi: 10.48550/ARXIV.2010.11929
 - [4] Nicolas Carion, Francisco Massa, Gabriel Synnaeve, Nicolas Usunier, Alexander Kirillov, Sergey Zagoruyko, "End-to-End Object Detection with Transformers", Computer Vision and Pattern Recognition (CVPR) 2020, doi: 10.48550/arXiv.2005.12872
--[5] Krzysztof Choromanski, Valerii Likhosherstov, David Dohan, Xingyou Song, Andreea Gane, Tamas Sarlos, Peter Hawkins, Jared Davis, Afroz Mohiuddin, Lukasz Kaiser, David Belanger, Lucy Colwell, Adrian Weller, "Rethinking Attention with Performers", Machine Learning 2021, doi: 10.48550/ARXIV.2009.14794
+- [5] Krzysztof Choromanski, Valerii Likhosherstov, David Dohan, Xingyou Song, Andreea Gane, Tamas Sarlos, Peter Hawkins, Jared Davis, Afroz Mohiuddin, Lukasz Kaiser, David Belanger, Lucy Colwell, Adrian Weller, "Rethinking Attention with Performers", Machine Learning 2021, doi: 10.48550/ARXIV.2009.14794
 # Contact
 
 [Güneş Çepiç](https://github.com/gunescepic), [Aybora Köksal](https://github.com/aybora)
